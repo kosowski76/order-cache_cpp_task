@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Order.cpp"
 
 // Provide an implementation for the OrderCacheInterface interface class.

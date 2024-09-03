@@ -1,9 +1,6 @@
-#pragma once
-
-#include "OrderCache.h"
+#include "../include/OrderCache.h"
 #include <algorithm>
 
-// OrderCache method implementations
 void OrderCache::addOrder(Order order) {
     orders[order.orderId()] = order;
     updateMappingsOnAdd(order);
@@ -18,15 +15,26 @@ void OrderCache::cancelOrder(const std::string& orderId) {
 }
 
 void OrderCache::cancelOrdersForUser(const std::string& user) {
+    // Find the iterator for the user's orders
     auto userOrdersIter = userOrders.find(user);
     if (userOrdersIter != userOrders.end()) {
+        // Loop through the user's orders and remove them from the cache
         for (const auto& orderId : userOrdersIter->second) {
             auto orderIter = orders.find(orderId);
             if (orderIter != orders.end()) {
-                updateMappingsOnCancel(orderIter->second);
+                // Remove the order from the securityOrders mapping
+                std::cout << "Cancelling Order ID: " << orderIter->second.orderId() << " for user: " << user << "\n";
+                auto& secOrdersList = securityOrders[orderIter->second.securityId()];
+                secOrdersList.erase(std::remove(secOrdersList.begin(), secOrdersList.end(), orderId), secOrdersList.end());
+                if (secOrdersList.empty()) {
+                    securityOrders.erase(orderIter->second.securityId());
+                }
+
+                // Finally, remove the order from the orders map
                 orders.erase(orderIter);
             }
         }
+        // After removing all orders for the user, remove the user from the userOrders map
         userOrders.erase(userOrdersIter);
     }
 }
@@ -46,40 +54,36 @@ void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityI
 
 unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityId) {
     unsigned int totalMatchedQty = 0;
-    std::vector<Order> buyOrders, sellOrders;
+    std::vector<Order*> buyOrders, sellOrders;
 
     auto securityOrdersIter = securityOrders.find(securityId);
     if (securityOrdersIter != securityOrders.end()) {
         for (const auto& orderId : securityOrdersIter->second) {
-            const auto& order = orders.at(orderId); // Using at() for safer access with exception handling
+            auto& order = orders[orderId];
             if (order.side() == "Buy") {
-                buyOrders.push_back(order);
+                buyOrders.push_back(&order);
             } else if (order.side() == "Sell") {
-                sellOrders.push_back(order);
+                sellOrders.push_back(&order);
             }
         }
 
-        // Sort buy and sell orders by order ID for consistent matching
-        std::sort(buyOrders.begin(), buyOrders.end(), [](const Order& a, const Order& b) {
-            return a.orderId() < b.orderId();
+        std::sort(buyOrders.begin(), buyOrders.end(), [](const Order* a, const Order* b) {
+            return a->orderId() < b->orderId();
         });
-        std::sort(sellOrders.begin(), sellOrders.end(), [](const Order& a, const Order& b) {
-            return a.orderId() < b.orderId();
+        std::sort(sellOrders.begin(), sellOrders.end(), [](const Order* a, const Order* b) {
+            return a->orderId() < b->orderId();
         });
 
-        // Attempt to match orders
         for (auto& buyOrder : buyOrders) {
             for (auto& sellOrder : sellOrders) {
-                if (buyOrder.company() != sellOrder.company()) {
-                    unsigned int matchedQty = std::min(buyOrder.qty(), sellOrder.qty());
+                if (buyOrder->company() != sellOrder->company()) {
+                    unsigned int matchedQty = std::min(buyOrder->qty(), sellOrder->qty());
                     totalMatchedQty += matchedQty;
 
-                    // Reduce the quantities by the matched amount
-                    buyOrder = Order(buyOrder.orderId(), buyOrder.securityId(), buyOrder.side(), buyOrder.qty() - matchedQty, buyOrder.user(), buyOrder.company());
-                    sellOrder = Order(sellOrder.orderId(), sellOrder.securityId(), sellOrder.side(), sellOrder.qty() - matchedQty, sellOrder.user(), sellOrder.company());
+                    buyOrder->setQty(buyOrder->qty() - matchedQty);
+                    sellOrder->setQty(sellOrder->qty() - matchedQty);
 
-                    // Stop matching this buy order if fully allocated
-                    if (buyOrder.qty() == 0) break;
+                    if (buyOrder->qty() == 0) break;
                 }
             }
         }
@@ -93,6 +97,9 @@ std::vector<Order> OrderCache::getAllOrders() const {
     for (const auto& [orderId, order] : orders) {
         allOrders.push_back(order);
     }
+    std::sort(allOrders.begin(), allOrders.end(), [](const Order& a, const Order& b) {
+        return a.orderId() < b.orderId();
+    });
     return allOrders;
 }
 
