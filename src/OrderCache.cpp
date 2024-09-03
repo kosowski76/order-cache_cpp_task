@@ -60,7 +60,7 @@ void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityI
 unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityId) {
     std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
     unsigned int totalMatchedQty = 0;
-    
+
     // Vectors to hold pointers to Buy and Sell orders for matching
     std::vector<Order*> buyOrders;
     std::vector<Order*> sellOrders;
@@ -115,6 +115,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 
     return totalMatchedQty;
 }
+
 
 std::vector<Order> OrderCache::getAllOrders() const {
     std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety

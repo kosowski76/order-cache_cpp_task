@@ -73,6 +73,53 @@ TEST(OrderCacheTest, GetMatchingSizeForSecurity_WithNewRules) {
 }
 
 
+TEST(OrderCacheTest, GetMatchingSizeForSecurity_SecId1_NoMatchDueToSameCompany) {
+    OrderCache cache;
+    
+    // Add orders for SecId1 with the same company, so they should not match
+    cache.addOrder(Order("OrdId1", "SecId1", "Buy", 1000, "User1", "CompanyA"));
+    cache.addOrder(Order("OrdId3", "SecId1", "Sell", 500, "User3", "CompanyA"));
+
+    // Since both orders are from the same company, there should be no matches
+    unsigned int matchingSize = cache.getMatchingSizeForSecurity("SecId1");
+
+    // Expect no matching quantity
+    EXPECT_EQ(matchingSize, 0) << "Expected no matches due to same company for SecId1.";
+}
+
+TEST(OrderCacheTest, GetMatchingSizeForSecurity_SecId2_MultipleMatches) {
+    OrderCache cache;
+    
+    // Add orders for SecId2
+    cache.addOrder(Order("OrdId2", "SecId2", "Sell", 3000, "User2", "CompanyB")); // Sell 3000
+    cache.addOrder(Order("OrdId4", "SecId2", "Buy", 600, "User4", "CompanyC"));  // Buy 600
+    cache.addOrder(Order("OrdId5", "SecId2", "Buy", 100, "User5", "CompanyB"));  // Buy 100
+    cache.addOrder(Order("OrdId7", "SecId2", "Buy", 2000, "User7", "CompanyE")); // Buy 2000
+    cache.addOrder(Order("OrdId8", "SecId2", "Sell", 5000, "User8", "CompanyE")); // Sell 5000
+
+    // Calculate the total matched quantity for SecId2
+    unsigned int matchingSize = cache.getMatchingSizeForSecurity("SecId2");
+
+    // Expected matches:
+    // - OrdId2 (Sell 3000) matches 600 with OrdId4 and 2000 with OrdId7: Total 2600
+    // - OrdId8 (Sell 5000) matches 100 with OrdId5: Total 100
+    // Total expected: 2600 + 100 = 2700
+    EXPECT_EQ(matchingSize, 2700) << "Expected matching quantity of 2700 for SecId2.";
+}
+
+TEST(OrderCacheTest, GetMatchingSizeForSecurity_SecId3_NoSellOrders) {
+    OrderCache cache;
+    
+    // Add a single Buy order for SecId3
+    cache.addOrder(Order("OrdId6", "SecId3", "Buy", 1000, "User6", "CompanyD"));
+
+    // No Sell orders available for SecId3, so there should be no matches
+    unsigned int matchingSize = cache.getMatchingSizeForSecurity("SecId3");
+
+    // Expect no matching quantity
+    EXPECT_EQ(matchingSize, 0) << "Expected no matches due to lack of Sell orders for SecId3.";
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
