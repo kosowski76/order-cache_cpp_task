@@ -11,11 +11,17 @@ include_directories(include)
 # Add source files
 add_library(OrderCache src/OrderCache.cpp)
 
-# Add Catch2 test files
+# Add test files
 enable_testing()
-#find_package(Catch2 REQUIRED)
-add_executable(test_OrderCache tests/OrderCacheTest.cpp)
-#target_link_libraries(test_OrderCache PRIVATE OrderCache Catch2::Catch2)
+
+# Find Google Test package
+find_package(GTest REQUIRED)
+
+add_executable(OrderCacheTest tests/OrderCacheTest.cpp)
+
+# Link Google Test libraries and pthread
+# target_link_libraries(OrderCacheTest GTest::GTest GTest::Main pthread)
+target_link_libraries(OrderCacheTest PRIVATE OrderCache GTest::GTest GTest::Main)
 
 # Add test
-add_test(NAME OrderCacheTest COMMAND test_OrderCache)
+add_test(NAME OrderCacheTest COMMAND OrderCacheTest)

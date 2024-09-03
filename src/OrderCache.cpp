@@ -1,5 +1,3 @@
-#pragma once
-
 #include "../include/OrderCache.h"
 #include <algorithm>
 
