@@ -116,5 +116,6 @@ Cancelling Order ID: order2 for user: user1
 
 ### 01.06. Use up to C++17. Your code must compile. Code should be platform agnostic
 
+ - [x] 100% tests passed, for Platform Agnostic Google Test Setup
 
 ### 01.07. Adding thread safety
