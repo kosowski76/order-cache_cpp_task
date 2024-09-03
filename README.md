@@ -3,7 +3,7 @@
 
  ## Technologies
   <ul>
-    <li>C++ 17</li>
+    <li>C++ 17; g++</li>
     <li>Debian 12</li>
     <li>Tests: cmake, Google test</li>
     <li>Multi-Threaded tests</li>
@@ -28,8 +28,35 @@
 
 ### 01.05. I highly recommend you run various tests yourself for verification
 
+ - [x] 01. cmake tests
 
+    git branch: 01-05-order-cache-tests
 
+    for Debian 12:
+    $ sudo apt update
+    $ sudo apt install -y g++ make cmake libcatch2-dev
 
+    OrderCache/
+    ├── include/
+    │   └── OrderCache.h
+    ├── src/
+    │   └── OrderCache.cpp
+    └── tests/
+        └── OrderCacheTest.cpp
 
+    $ g++ -std=c++17 -I./include -o OrderCacheTest tests/OrderCacheTest.cpp src/OrderCache.cpp
+    $ ./OrderCacheTest
 
+    output:
+        Retrieved orders:
+        Order ID: order1
+        Order ID: order2
+        Test Add Order: Passed
+        Test Cancel Order: Passed
+        Cancelling Order ID: order1 for user: user1
+        Cancelling Order ID: order2 for user: user1
+        Test Cancel Orders For User: Passed
+        Test Cancel Orders For SecId With Minimum Qty: Passed
+        Matching Size Calculated: 100
+        Test Get Matching Size For Security: Passed
+        All tests passed!

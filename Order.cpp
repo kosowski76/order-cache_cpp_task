@@ -6,6 +6,10 @@
 class Order
 {  
     public:
+        // Default constructor
+        Order() 
+            : m_orderId(""), m_securityId(""), m_side(""), m_qty(0), m_user(""), m_company("") {}
+
          // do not alter signature of this constructor
         Order(const std::string& ordId, const std::string& secId, const std::string& side,
             const unsigned int qty, const std::string& user, const std::string& company):
@@ -18,6 +22,8 @@ class Order
         std::string user() const       { return m_user; }
         std::string company() const    { return m_company; }
         unsigned int qty() const       { return m_qty; }
+
+        void setQty(unsigned int qty) { m_qty = qty; }
 
     private:  
         // use the below to hold the order data
