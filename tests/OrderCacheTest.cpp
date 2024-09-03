@@ -144,6 +144,28 @@ TEST(OrderCacheTest, MoreExamplesTest) {
     EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId3"), 600);  // Should be 600
 }
 
+TEST(OrderCacheTest, Example2Test) {
+    OrderCache cache;
+
+    // Dodawanie zamówień do cache zgodnie z Przykładem 2
+    cache.addOrder(Order("OrdId1", "SecId3", "Sell", 100, "User1", "Company1"));
+    cache.addOrder(Order("OrdId2", "SecId3", "Sell", 200, "User3", "Company2"));
+    cache.addOrder(Order("OrdId3", "SecId1", "Buy", 300, "User2", "Company1"));
+    cache.addOrder(Order("OrdId4", "SecId3", "Sell", 400, "User5", "Company2"));
+    cache.addOrder(Order("OrdId5", "SecId2", "Sell", 500, "User2", "Company1"));
+    cache.addOrder(Order("OrdId6", "SecId2", "Buy", 600, "User3", "Company2"));
+    cache.addOrder(Order("OrdId7", "SecId2", "Sell", 700, "User1", "Company1"));
+    cache.addOrder(Order("OrdId8", "SecId1", "Sell", 800, "User2", "Company1"));
+    cache.addOrder(Order("OrdId9", "SecId1", "Buy", 900, "User5", "Company2"));
+    cache.addOrder(Order("OrdId10", "SecId1", "Sell", 1000, "User1", "Company1"));
+    cache.addOrder(Order("OrdId11", "SecId2", "Sell", 1100, "User6", "Company2"));
+
+    // Testowanie wyników dopasowania dla każdego SecId
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId1"), 900);  // Powinno być 900
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId2"), 600);  // Powinno być 600
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId3"), 0);    // Powinno być 0
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
