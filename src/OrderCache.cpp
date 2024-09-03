@@ -60,8 +60,12 @@ void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityI
 unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityId) {
     std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
     unsigned int totalMatchedQty = 0;
-    std::vector<Order*> buyOrders, sellOrders;
+    
+    // Vectors to hold pointers to Buy and Sell orders for matching
+    std::vector<Order*> buyOrders;
+    std::vector<Order*> sellOrders;
 
+    // Retrieve orders related to the specified security ID
     auto securityOrdersIter = securityOrders.find(securityId);
     if (securityOrdersIter != securityOrders.end()) {
         for (const auto& orderId : securityOrdersIter->second) {
@@ -73,6 +77,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
             }
         }
 
+        // Sort buy and sell orders by their order IDs to maintain a deterministic matching process
         std::sort(buyOrders.begin(), buyOrders.end(), [](const Order* a, const Order* b) {
             return a->orderId() < b->orderId();
         });
@@ -80,16 +85,29 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
             return a->orderId() < b->orderId();
         });
 
+        // Attempt to match Buy and Sell orders
         for (auto& buyOrder : buyOrders) {
             for (auto& sellOrder : sellOrders) {
-                if (buyOrder->company() != sellOrder->company()) {
-                    unsigned int matchedQty = std::min(buyOrder->qty(), sellOrder->qty());
-                    totalMatchedQty += matchedQty;
+                // Skip matching if both orders are from the same company
+                if (buyOrder->company() == sellOrder->company()) {
+                    continue;
+                }
 
-                    buyOrder->setQty(buyOrder->qty() - matchedQty);
-                    sellOrder->setQty(sellOrder->qty() - matchedQty);
+                // Calculate the matchable quantity between the current Buy and Sell orders
+                unsigned int matchQty = std::min(buyOrder->qty(), sellOrder->qty());
 
-                    if (buyOrder->qty() == 0) break;
+                // If a match is possible, allocate the quantity and update the matched total
+                if (matchQty > 0) {
+                    totalMatchedQty += matchQty;
+
+                    // Update the quantities of the orders after matching
+                    buyOrder->setQty(buyOrder->qty() - matchQty);
+                    sellOrder->setQty(sellOrder->qty() - matchQty);
+
+                    // If the buy order is fully matched, move to the next buy order
+                    if (buyOrder->qty() == 0) {
+                        break;
+                    }
                 }
             }
         }

@@ -119,3 +119,7 @@ Cancelling Order ID: order2 for user: user1
  - [x] 100% tests passed, for Platform Agnostic Google Test Setup
 
 ### 01.07. Adding thread safety
+
+
+### 01.08. Order matching rules for getMatchingSizeForSecurity()
+

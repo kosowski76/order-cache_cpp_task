@@ -57,6 +57,22 @@ TEST(OrderCacheTest, GetMatchingSizeForSecurity) {
     EXPECT_EQ(matchingSize, 100);  // Expected 50 from order2 + 50 from order3, not exceeding buy quantity
 }
 
+TEST(OrderCacheTest, GetMatchingSizeForSecurity_WithNewRules) {
+    OrderCache cache;
+    
+    // Example setup: One large Buy order and two smaller Sell orders
+    cache.addOrder(Order("order1", "ABCD", "Buy", 10000, "user1", "companyA"));  // Buy 10,000
+    cache.addOrder(Order("order2", "ABCD", "Sell", 2000, "user2", "companyB")); // Sell 2,000
+    cache.addOrder(Order("order3", "ABCD", "Sell", 1000, "user3", "companyC")); // Sell 1,000
+
+    // Calculate the matching size
+    unsigned int matchingSize = cache.getMatchingSizeForSecurity("ABCD");
+
+    // Expect a match of 3,000 (Buy 10,000 matched with two Sells: 2,000 + 1,000)
+    EXPECT_EQ(matchingSize, 3000);
+}
+
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
