@@ -90,7 +90,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
             for (auto& sellOrder : sellOrders) {
                 // Skip matching if both orders are from the same company
                 if (buyOrder->company() == sellOrder->company()) {
-                    continue;
+                    continue; // Skip matching orders from the same company
                 }
 
                 // Calculate the matchable quantity between the current Buy and Sell orders
@@ -104,7 +104,12 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
                     buyOrder->setQty(buyOrder->qty() - matchQty);
                     sellOrder->setQty(sellOrder->qty() - matchQty);
 
-                    // If the buy order is fully matched, move to the next buy order
+                    // Print debug information for matches
+                    std::cout << "Matched " << matchQty << " between Buy " << buyOrder->orderId()
+                              << " (remaining " << buyOrder->qty() << ") and Sell " 
+                              << sellOrder->orderId() << " (remaining " << sellOrder->qty() << ")\n";
+
+                    // Stop matching the current buy order if fully matched
                     if (buyOrder->qty() == 0) {
                         break;
                     }
@@ -115,7 +120,6 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 
     return totalMatchedQty;
 }
-
 
 std::vector<Order> OrderCache::getAllOrders() const {
     std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety

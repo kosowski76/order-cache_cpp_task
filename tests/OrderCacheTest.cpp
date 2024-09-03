@@ -120,6 +120,30 @@ TEST(OrderCacheTest, GetMatchingSizeForSecurity_SecId3_NoSellOrders) {
     EXPECT_EQ(matchingSize, 0) << "Expected no matches due to lack of Sell orders for SecId3.";
 }
 
+TEST(OrderCacheTest, MoreExamplesTest) {
+    OrderCache cache;
+
+    // Adding orders to cache
+    cache.addOrder(Order("OrdId1", "SecId1", "Sell", 100, "User10", "Company2"));
+    cache.addOrder(Order("OrdId2", "SecId3", "Sell", 200, "User8", "Company2"));
+    cache.addOrder(Order("OrdId3", "SecId1", "Buy", 300, "User13", "Company2"));
+    cache.addOrder(Order("OrdId4", "SecId2", "Sell", 400, "User12", "Company2"));
+    cache.addOrder(Order("OrdId5", "SecId3", "Sell", 500, "User7", "Company2"));
+    cache.addOrder(Order("OrdId6", "SecId3", "Buy", 600, "User3", "Company1"));
+    cache.addOrder(Order("OrdId7", "SecId1", "Sell", 700, "User10", "Company2"));
+    cache.addOrder(Order("OrdId8", "SecId1", "Sell", 800, "User2", "Company1"));
+    cache.addOrder(Order("OrdId9", "SecId2", "Buy", 900, "User6", "Company2"));
+    cache.addOrder(Order("OrdId10", "SecId2", "Sell", 1000, "User5", "Company1"));
+    cache.addOrder(Order("OrdId11", "SecId1", "Sell", 1100, "User13", "Company2"));
+    cache.addOrder(Order("OrdId12", "SecId2", "Buy", 1200, "User9", "Company2"));
+    cache.addOrder(Order("OrdId13", "SecId1", "Sell", 1300, "User1", "Company2"));
+
+    // Testing the match results for each SecId
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId1"), 300);  // Should be 300
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId2"), 1000); // Should be 1000
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId3"), 600);  // Should be 600
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
