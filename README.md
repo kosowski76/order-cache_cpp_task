@@ -26,6 +26,7 @@
 
  - [x] the solution to the task is placed on the repo, for obvious reasons
 
+### 01.05. I highly recommend you run various tests yourself for verification
 
 
 
