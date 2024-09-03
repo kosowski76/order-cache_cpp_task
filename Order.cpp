@@ -10,6 +10,7 @@ class Order
         Order(const std::string& ordId, const std::string& secId, const std::string& side,
             const unsigned int qty, const std::string& user, const std::string& company):
             m_orderId(ordId), m_securityId(secId), m_side(side), m_qty(qty), m_user(user), m_company(company) { }
+
          // do not alter these accessor methods 
         std::string orderId() const    { return m_orderId; }
         std::string securityId() const { return m_securityId; }
