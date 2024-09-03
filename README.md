@@ -61,7 +61,7 @@
         Test Get Matching Size For Security: Passed
         All tests passed!
 
- - [ ] 02. google tests
+ - [x] 02. google tests
 
     for Debian 12:
     $ sudo apt-get update
@@ -114,3 +114,7 @@ Cancelling Order ID: order2 for user: user1
 [  PASSED  ] 5 tests.
 
 
+### 01.06. Use up to C++17. Your code must compile. Code should be platform agnostic
+
+
+### 01.07. Adding thread safety
