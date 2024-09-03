@@ -147,7 +147,7 @@ TEST(OrderCacheTest, MoreExamplesTest) {
 TEST(OrderCacheTest, Example2Test) {
     OrderCache cache;
 
-    // Dodawanie zamówień do cache zgodnie z Przykładem 2
+    // Adding orders to the cache according to Example 2
     cache.addOrder(Order("OrdId1", "SecId3", "Sell", 100, "User1", "Company1"));
     cache.addOrder(Order("OrdId2", "SecId3", "Sell", 200, "User3", "Company2"));
     cache.addOrder(Order("OrdId3", "SecId1", "Buy", 300, "User2", "Company1"));
@@ -160,10 +160,10 @@ TEST(OrderCacheTest, Example2Test) {
     cache.addOrder(Order("OrdId10", "SecId1", "Sell", 1000, "User1", "Company1"));
     cache.addOrder(Order("OrdId11", "SecId2", "Sell", 1100, "User6", "Company2"));
 
-    // Testowanie wyników dopasowania dla każdego SecId
-    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId1"), 900);  // Powinno być 900
-    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId2"), 600);  // Powinno być 600
-    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId3"), 0);    // Powinno być 0
+    // Testing the match results for each SecId
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId1"), 900);  // Should be 900
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId2"), 600);  // Should be 600
+    EXPECT_EQ(cache.getMatchingSizeForSecurity("SecId3"), 0);    // Should be 0
 }
 
 int main(int argc, char **argv) {
