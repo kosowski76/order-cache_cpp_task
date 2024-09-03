@@ -2,11 +2,13 @@
 #include <algorithm>
 
 void OrderCache::addOrder(Order order) {
+    std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
     orders[order.orderId()] = order;
     updateMappingsOnAdd(order);
 }
 
 void OrderCache::cancelOrder(const std::string& orderId) {
+    std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
     auto orderIter = orders.find(orderId);
     if (orderIter != orders.end()) {
         updateMappingsOnCancel(orderIter->second);
@@ -15,31 +17,34 @@ void OrderCache::cancelOrder(const std::string& orderId) {
 }
 
 void OrderCache::cancelOrdersForUser(const std::string& user) {
-    // Find the iterator for the user's orders
+    std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
+    
+    // Find the user orders in the map
     auto userOrdersIter = userOrders.find(user);
     if (userOrdersIter != userOrders.end()) {
-        // Loop through the user's orders and remove them from the cache
+        // Iterate over all order IDs for this user
         for (const auto& orderId : userOrdersIter->second) {
+            // Find and remove the order from the orders map
             auto orderIter = orders.find(orderId);
             if (orderIter != orders.end()) {
-                // Remove the order from the securityOrders mapping
-                std::cout << "Cancelling Order ID: " << orderIter->second.orderId() << " for user: " << user << "\n";
+                // Remove the order from the securityOrders map
                 auto& secOrdersList = securityOrders[orderIter->second.securityId()];
                 secOrdersList.erase(std::remove(secOrdersList.begin(), secOrdersList.end(), orderId), secOrdersList.end());
                 if (secOrdersList.empty()) {
                     securityOrders.erase(orderIter->second.securityId());
                 }
-
-                // Finally, remove the order from the orders map
+                // Remove the order from the orders map
                 orders.erase(orderIter);
             }
         }
-        // After removing all orders for the user, remove the user from the userOrders map
+        // Finally, remove the user from the userOrders map
         userOrders.erase(userOrdersIter);
     }
 }
 
+
 void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityId, unsigned int minQty) {
+    std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
     auto securityOrdersIter = securityOrders.find(securityId);
     if (securityOrdersIter != securityOrders.end()) {
         for (const auto& orderId : securityOrdersIter->second) {
@@ -53,6 +58,7 @@ void OrderCache::cancelOrdersForSecIdWithMinimumQty(const std::string& securityI
 }
 
 unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityId) {
+    std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
     unsigned int totalMatchedQty = 0;
     std::vector<Order*> buyOrders, sellOrders;
 
@@ -93,6 +99,7 @@ unsigned int OrderCache::getMatchingSizeForSecurity(const std::string& securityI
 }
 
 std::vector<Order> OrderCache::getAllOrders() const {
+    std::lock_guard<std::mutex> lock(cacheMutex);  // Lock mutex for thread safety
     std::vector<Order> allOrders;
     for (const auto& [orderId, order] : orders) {
         allOrders.push_back(order);

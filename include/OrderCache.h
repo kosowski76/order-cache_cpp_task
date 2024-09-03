@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <mutex> // For std::mutex
 
 #include "../OrderCacheInterface.cpp" // Make sure this header includes the OrderCacheInterface definition.
 
@@ -57,4 +58,7 @@ class OrderCache : public OrderCacheInterface {
         // Updates internal mappings when an order is removed.
         // Removes the order's associations from userOrders and securityOrders to keep the data consistent.
         void updateMappingsOnCancel(const Order& order);
+
+        // Mutex for protecting access to the above member variables
+        mutable std::mutex cacheMutex;
 };
